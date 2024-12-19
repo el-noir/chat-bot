@@ -5,10 +5,14 @@ import 'custompage.dart'; // Ensure this import is correct if Custompage is in a
 class SignUpPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor:
+          isDarkMode ? Colors.black : Colors.white, // Adjust background color
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor:
+            isDarkMode ? Colors.black : Colors.transparent, // AppBar color
         elevation: 0,
         centerTitle: true,
         title: Hero(
@@ -16,14 +20,15 @@ class SignUpPage extends StatelessWidget {
           child: Text(
             'Sign Up',
             style: TextStyle(
-              color: Colors.black,
+              color: isDarkMode ? Colors.white : Colors.black, // Text color
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back,
+              color: isDarkMode ? Colors.white : Colors.black),
           onPressed: () {
             Navigator.pop(context); // Go back to the previous page
           },
@@ -44,48 +49,22 @@ class SignUpPage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      color: isDarkMode
+                          ? Colors.white
+                          : Colors.black, // Text color
                     ),
                   ),
                   SizedBox(height: 20),
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Username',
-                      labelStyle: TextStyle(color: Colors.black),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black),
-                      ),
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
+                  _buildTextField(isDarkMode, 'Username'),
                   SizedBox(height: 16),
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      labelStyle: TextStyle(color: Colors.black),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black),
-                      ),
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
+                  _buildTextField(isDarkMode, 'Email'),
                   SizedBox(height: 16),
-                  TextField(
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      labelStyle: TextStyle(color: Colors.black),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black),
-                      ),
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
+                  _buildTextField(isDarkMode, 'Password', obscureText: true),
                   SizedBox(height: 20),
                   AnimatedHoverButton(
                     text: 'Sign Up',
-                    backgroundColor: Colors.black,
-                    textColor: Colors.white,
+                    backgroundColor: isDarkMode ? Colors.white : Colors.black,
+                    textColor: isDarkMode ? Colors.black : Colors.white,
                     onPressed: () {
                       // Add the logic for sign-up process
                     },
@@ -102,7 +81,7 @@ class SignUpPage extends StatelessWidget {
                   Text(
                     'Already have an account? ',
                     style: TextStyle(
-                      color: Colors.black,
+                      color: isDarkMode ? Colors.white : Colors.black,
                       fontSize: 16,
                     ),
                   ),
@@ -118,7 +97,7 @@ class SignUpPage extends StatelessWidget {
                     child: Text(
                       'Login',
                       style: TextStyle(
-                        color: Colors.black,
+                        color: isDarkMode ? Colors.white : Colors.black,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -129,6 +108,26 @@ class SignUpPage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(bool isDarkMode, String label,
+      {bool obscureText = false}) {
+    return TextField(
+      obscureText: obscureText,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(
+            color: isDarkMode ? Colors.white : Colors.black), // Label color
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+              color: isDarkMode ? Colors.white : Colors.black), // Border color
+        ),
+        border: OutlineInputBorder(),
+        fillColor:
+            isDarkMode ? Colors.grey[800] : Colors.white, // Input background
+        filled: true,
       ),
     );
   }

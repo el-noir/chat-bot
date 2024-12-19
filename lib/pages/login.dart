@@ -17,6 +17,13 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Get current theme for colors
+    final ThemeData theme = Theme.of(context);
+    final Color primaryTextColor =
+        theme.textTheme.bodyLarge?.color ?? Colors.black; // Update this line
+    final Color inputBorderColor =
+        theme.inputDecorationTheme.border?.borderSide.color ?? Colors.black;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -27,14 +34,15 @@ class _LoginPageState extends State<LoginPage> {
           child: Text(
             'Login',
             style: TextStyle(
-              color: Colors.black, // Match SignUpPage color
+              color: primaryTextColor, // Adjust based on the current theme
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back,
+              color: primaryTextColor), // Adjust based on theme
           onPressed: () {
             Navigator.pop(context); // Go back to the previous page
           },
@@ -53,7 +61,7 @@ class _LoginPageState extends State<LoginPage> {
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black, // Match SignUpPage color
+                  color: primaryTextColor, // Adjust based on theme
                 ),
               ),
               SizedBox(height: 10),
@@ -61,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
                 'Please log in to continue',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.grey[600], // Match SignUpPage color
+                  color: Colors.grey[600], // Adjust based on theme
                 ),
               ),
 
@@ -76,18 +84,23 @@ class _LoginPageState extends State<LoginPage> {
                       controller: _emailController,
                       decoration: InputDecoration(
                         labelText: 'Email',
-                        labelStyle: TextStyle(color: Colors.black), // Match SignUpPage color
-                        prefixIcon: Icon(Icons.email_outlined, color: Colors.black), // Match SignUpPage color
+                        labelStyle: TextStyle(
+                            color: primaryTextColor), // Adjust based on theme
+                        prefixIcon: Icon(Icons.email_outlined,
+                            color: primaryTextColor), // Adjust based on theme
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.black), // Match SignUpPage color
+                          borderSide: BorderSide(
+                              color: inputBorderColor), // Adjust based on theme
                         ),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your email';
                         }
-                        if (!RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$").hasMatch(value)) {
+                        if (!RegExp(
+                                r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$")
+                            .hasMatch(value)) {
                           return 'Please enter a valid email address';
                         }
                         return null;
@@ -101,12 +114,16 @@ class _LoginPageState extends State<LoginPage> {
                       obscureText: _isObscured,
                       decoration: InputDecoration(
                         labelText: 'Password',
-                        labelStyle: TextStyle(color: Colors.black), // Match SignUpPage color
-                        prefixIcon: Icon(Icons.lock_outline, color: Colors.black), // Match SignUpPage color
+                        labelStyle: TextStyle(
+                            color: primaryTextColor), // Adjust based on theme
+                        prefixIcon: Icon(Icons.lock_outline,
+                            color: primaryTextColor), // Adjust based on theme
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _isObscured ? Icons.visibility_off : Icons.visibility,
-                            color: Colors.black, // Match SignUpPage color
+                            _isObscured
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: primaryTextColor, // Adjust based on theme
                           ),
                           onPressed: () {
                             setState(() {
@@ -116,7 +133,8 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.black), // Match SignUpPage color
+                          borderSide: BorderSide(
+                              color: inputBorderColor), // Adjust based on theme
                         ),
                       ),
                       validator: (value) {
@@ -170,7 +188,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: Text(
                         'Forgot Password?',
                         style: TextStyle(
-                          color: Colors.black, // Match SignUpPage color
+                          color: primaryTextColor, // Adjust based on theme
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
@@ -190,7 +208,7 @@ class _LoginPageState extends State<LoginPage> {
                         text: TextSpan(
                           text: 'Don\'t have an account? ',
                           style: TextStyle(
-                            color: Colors.black, // Match SignUpPage color
+                            color: primaryTextColor, // Adjust based on theme
                             fontSize: 14,
                           ),
                           children: [

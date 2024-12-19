@@ -2,15 +2,26 @@ import 'package:flutter/material.dart';
 import 'login.dart';
 import 'signup.dart';
 import 'newchat.dart';
+import 'settings.dart';
+import 'terms.dart'; // Import the TermsPage
+import 'privacy.dart'; // Import the PrivacyPage
 
 class Custompage extends StatefulWidget {
+  final Function(bool) onThemeChanged; // Callback to handle theme change
+  final bool isDarkMode; // Current theme state
+
+  const Custompage({
+    Key? key,
+    required this.onThemeChanged,
+    required this.isDarkMode,
+  }) : super(key: key);
+
   @override
   _EnhancedPageWithAnimationsState createState() =>
       _EnhancedPageWithAnimationsState();
 }
 
-class _EnhancedPageWithAnimationsState
-    extends State<Custompage>
+class _EnhancedPageWithAnimationsState extends State<Custompage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
@@ -31,12 +42,8 @@ class _EnhancedPageWithAnimationsState
     );
 
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(0.0, 1.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOut,
-    ));
+            begin: const Offset(0.0, 1.0), end: Offset.zero)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _controller.forward(); // Start animation on page load
   }
@@ -50,7 +57,7 @@ class _EnhancedPageWithAnimationsState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: widget.isDarkMode ? Colors.black : Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -69,14 +76,27 @@ class _EnhancedPageWithAnimationsState
             child: Text(
               'New Chat',
               style: TextStyle(
-                color: Colors.black,
+                color: widget.isDarkMode ? Colors.white : Colors.black,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
         ),
-        leading: Icon(Icons.chat_bubble_outline, color: Colors.black),
+        leading: Icon(Icons.chat_bubble_outline,
+            color: widget.isDarkMode ? Colors.white : Colors.black),
+        actions: [
+          IconButton(
+            icon: Icon(
+              widget.isDarkMode ? Icons.wb_sunny : Icons.nightlight_round,
+              color: widget.isDarkMode ? Colors.white : Colors.black,
+            ),
+            onPressed: () {
+              // Toggle theme on press
+              widget.onThemeChanged(!widget.isDarkMode);
+            },
+          ),
+        ],
       ),
       body: FadeTransition(
         opacity: _fadeAnimation,
@@ -98,9 +118,14 @@ class _EnhancedPageWithAnimationsState
                       onTap: () {
                         Navigator.push(
                           context,
-                          _createRoute(NextPage(title: 'Terms')),
+                          MaterialPageRoute(
+                            builder: (context) => TermsPage(
+                                isDarkMode:
+                                    widget.isDarkMode), // Pass dark mode state
+                          ),
                         );
                       },
+                      isDarkMode: widget.isDarkMode, // Pass dark mode state
                     ),
                     AnimatedOptionTile(
                       title: 'Privacy',
@@ -109,9 +134,14 @@ class _EnhancedPageWithAnimationsState
                       onTap: () {
                         Navigator.push(
                           context,
-                          _createRoute(NextPage(title: 'Privacy')),
+                          MaterialPageRoute(
+                            builder: (context) => PrivacyPage(
+                                isDarkMode:
+                                    widget.isDarkMode), // Pass dark mode state
+                          ),
                         );
                       },
+                      isDarkMode: widget.isDarkMode, // Pass dark mode state
                     ),
                     AnimatedOptionTile(
                       title: 'Settings',
@@ -120,9 +150,15 @@ class _EnhancedPageWithAnimationsState
                       onTap: () {
                         Navigator.push(
                           context,
-                          _createRoute(NextPage(title: 'Settings')),
+                          MaterialPageRoute(
+                            builder: (context) => SettingsPage(
+                              onThemeChanged: widget.onThemeChanged,
+                              isDarkMode: widget.isDarkMode,
+                            ),
+                          ),
                         );
                       },
+                      isDarkMode: widget.isDarkMode, // Pass dark mode state
                     ),
                   ],
                 ),
@@ -137,7 +173,7 @@ class _EnhancedPageWithAnimationsState
                     'Save your chat history, share chats, and personalize your experience.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.black,
+                      color: widget.isDarkMode ? Colors.white : Colors.black,
                       fontSize: 14,
                       height: 1.6,
                       fontWeight: FontWeight.w400,
@@ -179,7 +215,8 @@ class _EnhancedPageWithAnimationsState
                           },
                           margin: const EdgeInsets.symmetric(horizontal: 8),
                           position: "right",
-                          icon: const Icon(Icons.person_add, color: Colors.white),
+                          icon:
+                              const Icon(Icons.person_add, color: Colors.white),
                         ),
                       ),
                     ],
@@ -202,7 +239,8 @@ class _EnhancedPageWithAnimationsState
         const end = Offset.zero; // End at the current position
         const curve = Curves.easeInOut;
 
-        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        var tween =
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
         var offsetAnimation = animation.drive(tween);
 
         return SlideTransition(
@@ -220,37 +258,52 @@ class AnimatedOptionTile extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
   final int animationDelay;
+  final bool isDarkMode; // Add dark mode flag
 
   const AnimatedOptionTile({
     required this.title,
     required this.icon,
     required this.onTap,
     required this.animationDelay,
+    required this.isDarkMode, // Add dark mode flag to constructor
   });
 
   @override
   Widget build(BuildContext context) {
     return DelayedAnimation(
       delay: animationDelay,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(vertical: 16.0),
-          margin: EdgeInsets.only(bottom: 12.0),
-          child: Row(
-            children: [
-              Icon(icon, color: Colors.black, size: 20),
-              SizedBox(width: 12),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w500,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click, // Change cursor to hand pointer
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(vertical: 16.0),
+            margin: EdgeInsets.only(bottom: 12.0),
+            child: Row(
+              children: [
+                // Adjust Icon color based on dark mode
+                Icon(
+                  icon,
+                  color: isDarkMode
+                      ? Colors.white
+                      : Colors.black, // Adjust icon color for dark mode
+                  size: 20,
                 ),
-              ),
-            ],
+                SizedBox(width: 12),
+                // Adjust Text color based on dark mode
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: isDarkMode
+                        ? Colors.white
+                        : Colors.black, // Adjust text color for dark mode
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -281,30 +334,6 @@ class DelayedAnimation extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-// NextPage for Navigation
-class NextPage extends StatelessWidget {
-  final String title;
-
-  const NextPage({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        centerTitle: true,
-        backgroundColor: Colors.black,
-      ),
-      body: Center(
-        child: Text(
-          '$title Page',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-      ),
     );
   }
 }
@@ -361,7 +390,7 @@ class MagicButton extends StatelessWidget {
           children: [
             if (position == "left" && icon != null) ...[
               icon!,
-              const SizedBox(width: 8),
+              const SizedBox(width: 8)
             ],
             Text(
               title,
@@ -369,7 +398,7 @@ class MagicButton extends StatelessWidget {
             ),
             if (position == "right" && icon != null) ...[
               const SizedBox(width: 8),
-              icon!,
+              icon!
             ],
           ],
         ),

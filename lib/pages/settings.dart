@@ -2,27 +2,35 @@ import 'package:flutter/material.dart';
 import 'login.dart'; // Assuming this is the login page
 
 class SettingsPage extends StatefulWidget {
+  final Function(bool) onThemeChanged; // Callback to update theme
+  final bool isDarkMode; // Current theme status
+
+  const SettingsPage({
+    Key? key,
+    required this.onThemeChanged,
+    required this.isDarkMode,
+  }) : super(key: key);
+
   @override
   _SettingsPageState createState() => _SettingsPageState();
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  bool _isDarkMode = false; // Initial mode (light mode by default)
+  late bool _isDarkMode;
   String _selectedLanguage = 'English'; // Default language
   bool _isUserLoggedIn = false; // Simulate user login status
 
   @override
   void initState() {
     super.initState();
-    // You can load the login status from a persistent storage like SharedPreferences
-    // Example: _isUserLoggedIn = loadUserLoginStatus();
+    _isDarkMode = widget.isDarkMode; // Initialize with passed theme status
   }
 
   void _toggleTheme(bool value) {
     setState(() {
       _isDarkMode = value;
     });
-    // Add logic to update the app theme dynamically.
+    widget.onThemeChanged(value); // Notify parent to change theme
   }
 
   @override
@@ -33,7 +41,7 @@ class _SettingsPageState extends State<SettingsPage> {
         centerTitle: true,
         backgroundColor: _isDarkMode
             ? Colors.black
-            : const Color.fromARGB(255, 179, 212, 239),
+            : const Color.fromARGB(255, 210, 214, 218),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
