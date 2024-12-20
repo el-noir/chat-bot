@@ -3,11 +3,18 @@ import 'package:shared_preferences/shared_preferences.dart'; // For persistent t
 import 'pages/custompage.dart'; // Ensure this file exists and is correctly imported
 import 'pages/page1.dart'; // Ensure this file exists and is correctly imported
 import 'pages/settings.dart'; // Import your SettingsPage
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Load the saved theme preference
+  
+  // Initialize Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
+  // Load theme preference and run the app
   final bool isDarkMode = await loadThemePreference();
   runApp(MyApp(isDarkMode: isDarkMode));
 }
