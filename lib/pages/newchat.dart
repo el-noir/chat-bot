@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'magic_button.dart'; // Assuming you have MagicButton defined elsewhere.
 import 'signup.dart';
 import './chatbot_service.dart';
+import './custompage.dart';
 
 class AnimatedTile extends StatelessWidget {
   final String title;
@@ -46,14 +47,13 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
-  bool isHoveringMenuIcon = false;
   bool isSidebarOpen = false;
   List<String> chatHistory = [];
-  bool isUserLoggedIn = false; // Example flag for user login
-  bool isBotTyping = false; // Flag for typing indicator
-  bool hasUserStartedChat = false; // Track if chat has started
+  bool isUserLoggedIn =
+      false; // Assume this is determined based on the user's login status
+  bool isBotTyping = false;
+  bool hasUserStartedChat = false;
 
-  // TextEditingController for the input field
   TextEditingController _textController = TextEditingController();
 
   late AnimationController _animationController;
@@ -68,11 +68,10 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   void startNewChat() {
     setState(() {
       chatHistory.clear();
-      hasUserStartedChat = false; // Reset the chat started flag
+      hasUserStartedChat = false;
     });
   }
 
-  // Send message function
   void sendMessage() async {
     final inputText = _textController.text.trim();
 
@@ -82,7 +81,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       chatHistory.add("You: $inputText");
       _textController.clear();
       isBotTyping = true;
-      hasUserStartedChat = true; // Mark that the chat has started
+      hasUserStartedChat = true;
     });
 
     try {
@@ -106,7 +105,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     _animationController = AnimationController(
       vsync: this,
       duration: Duration(seconds: 1),
-    )..repeat(reverse: true); // Repeat animation to make the tile bounce
+    )..repeat(reverse: true);
     _slideAnimation = Tween<Offset>(begin: Offset(0, -0.5), end: Offset(0, 0))
         .animate(CurvedAnimation(
       parent: _animationController,
@@ -121,18 +120,16 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  // Function to handle tile click and update the text field
   void updateTextInput(String text) {
     setState(() {
       _textController.text = text;
-      isBotTyping = true; // Show the typing indicator when the bot "types"
-      hasUserStartedChat = true; // Mark chat as started
+      isBotTyping = true;
+      hasUserStartedChat = true;
     });
 
-    // Simulate bot typing and response delay
     Future.delayed(Duration(seconds: 2), () {
       setState(() {
-        isBotTyping = false; // Hide the typing indicator after response
+        isBotTyping = false;
         chatHistory.add("Bot: Here's a response to '$text'");
       });
     });
@@ -156,24 +153,25 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
         ),
         centerTitle: true,
         leading: IconButton(
-          icon:
-              Icon(Icons.menu, color: isDarkMode ? Colors.white : Colors.black),
-          onPressed: toggleSidebar,
+          icon: Icon(Icons.arrow_back,
+              color: isDarkMode ? Colors.white : Colors.black),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => Custompage(
+                  isDarkMode: isDarkMode,
+                  onThemeChanged: (value) {},
+                ),
+              ),
+            );
+          },
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: MagicButton(
-              title: "Sign Up",
-              icon: Icon(Icons.person_add, size: 16),
-              position: "left",
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SignUpPage()),
-                );
-              },
-            ),
+          IconButton(
+            icon: Icon(Icons.menu,
+                color: isDarkMode ? Colors.white : Colors.black),
+            onPressed: toggleSidebar,
           ),
         ],
       ),
@@ -233,7 +231,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                     itemCount: chatHistory.length,
                     itemBuilder: (context, index) {
                       return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 16.0),
                         child: Align(
                           alignment: chatHistory[index].startsWith("You:")
                               ? Alignment.centerRight
@@ -261,10 +260,12 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
                     "Bot is typing...",
-                    style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
+                    style: TextStyle(
+                        fontStyle: FontStyle.italic, color: Colors.grey),
                   ),
                 ),
-              ChatInputField(controller: _textController, sendMessage: sendMessage),
+              ChatInputField(
+                  controller: _textController, sendMessage: sendMessage),
             ],
           ),
           AnimatedPositioned(
@@ -287,6 +288,22 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                               color: isDarkMode ? Colors.white : Colors.black)),
                       onTap: startNewChat,
                     ),
+                    if (!isUserLoggedIn) // Hide if the user is logged in
+                      ListTile(
+                        leading: Icon(Icons.person_add,
+                            color: isDarkMode ? Colors.white : Colors.black),
+                        title: Text("Sign Up",
+                            style: TextStyle(
+                                color:
+                                    isDarkMode ? Colors.white : Colors.black)),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SignUpPage()),
+                          );
+                        },
+                      ),
                     ListTile(
                       leading: Icon(Icons.settings,
                           color: isDarkMode ? Colors.white : Colors.black),
@@ -298,14 +315,11 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                       },
                     ),
                     Divider(),
-                    // Profile Section
                     ListTile(
                       leading: CircleAvatar(
                         backgroundImage: isUserLoggedIn
-                            ? AssetImage(
-                                'assets/profile.jpg') // User profile picture
-                            : AssetImage(
-                                'assets/what-is-bot.webp'), // Robot icon if not logged in
+                            ? AssetImage('assets/profile.jpg')
+                            : AssetImage('assets/what-is-bot.webp'),
                       ),
                       title: Text("Profile",
                           style: TextStyle(
@@ -368,9 +382,7 @@ class ChatInputField extends StatelessWidget {
             ),
           ),
           SizedBox(width: 8),
-          ElevatedButton(
-              onPressed: sendMessage,
-              child: Text("Send"))
+          ElevatedButton(onPressed: sendMessage, child: Text("Send"))
         ],
       ),
     );

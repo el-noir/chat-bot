@@ -42,16 +42,26 @@ class _SettingsPageState extends State<SettingsPage> {
         backgroundColor: _isDarkMode
             ? Colors.black
             : const Color.fromARGB(255, 210, 214, 218),
+        foregroundColor: _isDarkMode ? Colors.white : Colors.black,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
           // Theme Toggle
           ListTile(
-            leading: const Icon(Icons.dark_mode),
-            title: const Text('Dark Mode'),
+            leading: Icon(
+              _isDarkMode ? Icons.nightlight_round : Icons.wb_sunny,
+              color: _isDarkMode ? Colors.white : Colors.black,
+            ),
+            title: Text(
+              _isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode',
+              style: TextStyle(
+                color: _isDarkMode ? Colors.white : Colors.black,
+              ),
+            ),
             trailing: Switch(
               value: _isDarkMode,
+              activeColor: Colors.blue,
               onChanged: _toggleTheme,
             ),
           ),
@@ -135,6 +145,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ],
       ),
+      backgroundColor: _isDarkMode ? Colors.black : Colors.white,
     );
   }
 }
