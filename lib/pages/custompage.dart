@@ -25,7 +25,6 @@ class _EnhancedPageWithAnimationsState extends State<Custompage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
@@ -40,10 +39,6 @@ class _EnhancedPageWithAnimationsState extends State<Custompage>
       parent: _controller,
       curve: Curves.easeIn,
     );
-
-    _slideAnimation = Tween<Offset>(
-            begin: const Offset(0.0, 1.0), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _controller.forward(); // Start animation on page load
   }
@@ -103,123 +98,140 @@ class _EnhancedPageWithAnimationsState extends State<Custompage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Options Section
+            // Main Content Section
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: SlideTransition(
-                position: _slideAnimation,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AnimatedOptionTile(
-                      title: 'Terms',
-                      icon: Icons.article_outlined,
-                      animationDelay: 300,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => TermsPage(
-                                isDarkMode:
-                                    widget.isDarkMode), // Pass dark mode state
-                          ),
-                        );
-                      },
-                      isDarkMode: widget.isDarkMode, // Pass dark mode state
+              padding: const EdgeInsets.all(20.0),
+              child: TweenAnimationBuilder(
+                tween: Tween<double>(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.easeInOut,
+                builder: (context, value, child) {
+                  return Opacity(
+                    opacity: value,
+                    child: Transform.translate(
+                      offset: Offset(
+                          0, 20 * (1 - value)), // Slide up as it fades in
+                      child: child,
                     ),
-                    AnimatedOptionTile(
-                      title: 'Privacy',
-                      icon: Icons.lock_outline,
-                      animationDelay: 600,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PrivacyPage(
-                                isDarkMode:
-                                    widget.isDarkMode), // Pass dark mode state
-                          ),
-                        );
-                      },
-                      isDarkMode: widget.isDarkMode, // Pass dark mode state
-                    ),
-                    AnimatedOptionTile(
-                      title: 'Settings',
-                      icon: Icons.settings_outlined,
-                      animationDelay: 900,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => SettingsPage(
-                              onThemeChanged: widget.onThemeChanged,
-                              isDarkMode: widget.isDarkMode,
-                            ),
-                          ),
-                        );
-                      },
-                      isDarkMode: widget.isDarkMode, // Pass dark mode state
-                    ),
-                  ],
+                  );
+                },
+                child: Text(
+                  'Secure your chats, share moments, and make your experience truly yours.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: widget.isDarkMode ? Colors.white : Colors.black,
+                    fontSize: 14,
+                    height: 1.6,
+                    fontWeight: FontWeight.w400,
+                  ),
                 ),
               ),
             ),
-            // Footer Section
+
+            // Signup and Login Buttons Section
+            // Inside your build method after the text message
+
             Padding(
               padding: const EdgeInsets.all(20.0),
-              child: Column(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment
+                    .center, // Ensure buttons are aligned in center
                 children: [
-                  Text(
-                    'Save your chat history, share chats, and personalize your experience.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: widget.isDarkMode ? Colors.white : Colors.black,
-                      fontSize: 14,
-                      height: 1.6,
-                      fontWeight: FontWeight.w400,
+                  // Signup Button
+                  MagicButton(
+                    title: 'Signup',
+                    icon: Icon(
+                        Icons.app_registration), // Pass the Icon widget here
+                    position: 'left',
+                    onPressed: () {
+                      // Navigate to Signup Page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SignUpPage(),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 20), // Add some space between buttons
+                  // Login Button
+                  MagicButton(
+                    title: 'Login',
+                    icon: Icon(Icons.login), // Pass the Icon widget here
+                    position: 'right',
+                    onPressed: () {
+                      // Navigate to Login Page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => LoginPage(),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+
+            // Horizontal Buttons Section (Terms, Privacy, Settings)
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // Terms Button
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              TermsPage(isDarkMode: widget.isDarkMode),
+                        ),
+                      );
+                    },
+                    child: OptionTile(
+                      title: 'Terms',
+                      icon: Icons.article_outlined,
+                      isDarkMode: widget.isDarkMode,
                     ),
                   ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      // Login Button with MagicButton
-                      Expanded(
-                        child: MagicButton(
-                          title: 'Login',
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => LoginPage(),
-                              ),
-                            );
-                          },
-                          margin: const EdgeInsets.symmetric(horizontal: 8),
-                          position: "left",
-                          icon: const Icon(Icons.login, color: Colors.white),
+                  // Privacy Button
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              PrivacyPage(isDarkMode: widget.isDarkMode),
                         ),
-                      ),
-                      SizedBox(width: 16),
-                      // Sign Up Button with MagicButton
-                      Expanded(
-                        child: MagicButton(
-                          title: 'Sign Up',
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => SignUpPage(),
-                              ),
-                            );
-                          },
-                          margin: const EdgeInsets.symmetric(horizontal: 8),
-                          position: "right",
-                          icon:
-                              const Icon(Icons.person_add, color: Colors.white),
+                      );
+                    },
+                    child: OptionTile(
+                      title: 'Privacy',
+                      icon: Icons.lock_outline,
+                      isDarkMode: widget.isDarkMode,
+                    ),
+                  ),
+                  // Settings Button
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SettingsPage(
+                            onThemeChanged: widget.onThemeChanged,
+                            isDarkMode: widget.isDarkMode,
+                          ),
                         ),
-                      ),
-                    ],
+                      );
+                    },
+                    child: OptionTile(
+                      title: 'Settings',
+                      icon: Icons.settings_outlined,
+                      isDarkMode: widget.isDarkMode,
+                    ),
                   ),
                 ],
               ),
@@ -229,117 +241,45 @@ class _EnhancedPageWithAnimationsState extends State<Custompage>
       ),
     );
   }
-
-  // Function to create custom page transitions
-  Route _createRoute(Widget page) {
-    return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => page,
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(1.0, 0.0); // Start from the right
-        const end = Offset.zero; // End at the current position
-        const curve = Curves.easeInOut;
-
-        var tween =
-            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-        var offsetAnimation = animation.drive(tween);
-
-        return SlideTransition(
-          position: offsetAnimation,
-          child: child,
-        );
-      },
-    );
-  }
 }
 
-// OptionTile with Animated Appearance
-class AnimatedOptionTile extends StatelessWidget {
+// OptionTile Widget
+class OptionTile extends StatelessWidget {
   final String title;
   final IconData icon;
-  final VoidCallback onTap;
-  final int animationDelay;
-  final bool isDarkMode; // Add dark mode flag
+  final bool isDarkMode;
 
-  const AnimatedOptionTile({
+  const OptionTile({
     required this.title,
     required this.icon,
-    required this.onTap,
-    required this.animationDelay,
-    required this.isDarkMode, // Add dark mode flag to constructor
+    required this.isDarkMode,
   });
 
   @override
   Widget build(BuildContext context) {
-    return DelayedAnimation(
-      delay: animationDelay,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click, // Change cursor to hand pointer
-        child: GestureDetector(
-          onTap: onTap,
-          child: Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(vertical: 16.0),
-            margin: EdgeInsets.only(bottom: 12.0),
-            child: Row(
-              children: [
-                // Adjust Icon color based on dark mode
-                Icon(
-                  icon,
-                  color: isDarkMode
-                      ? Colors.white
-                      : Colors.black, // Adjust icon color for dark mode
-                  size: 20,
-                ),
-                SizedBox(width: 12),
-                // Adjust Text color based on dark mode
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: isDarkMode
-                        ? Colors.white
-                        : Colors.black, // Adjust text color for dark mode
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
+    return Column(
+      children: [
+        Icon(
+          icon,
+          color: isDarkMode ? Colors.white : Colors.black,
+          size: 24,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 14,
+            color: isDarkMode ? Colors.white : Colors.black,
+            fontWeight: FontWeight.w500,
           ),
         ),
-      ),
+      ],
     );
   }
 }
 
-// Delayed Animation Widget
-class DelayedAnimation extends StatelessWidget {
-  final Widget child;
-  final int delay;
-
-  const DelayedAnimation({required this.child, required this.delay});
-
-  @override
-  Widget build(BuildContext context) {
-    return TweenAnimationBuilder(
-      tween: Tween<double>(begin: 0, end: 1),
-      duration: Duration(milliseconds: 500),
-      curve: Curves.easeIn,
-      child: child,
-      builder: (context, value, child) {
-        return Opacity(
-          opacity: value,
-          child: Transform.translate(
-            offset: Offset(0, 50 * (1 - value)),
-            child: child,
-          ),
-        );
-      },
-    );
-  }
-}
-
-// MagicButton
-class MagicButton extends StatelessWidget {
+// MagicButton Widget
+class MagicButton extends StatefulWidget {
   final String title;
   final Icon? icon;
   final String position; // "left" or "right"
@@ -356,53 +296,83 @@ class MagicButton extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  _MagicButtonState createState() => _MagicButtonState();
+}
+
+class _MagicButtonState extends State<MagicButton> {
+  // Initial scale and shadow properties
+  double _scale = 1.0;
+  double _elevation = 0.0;
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: margin ?? const EdgeInsets.only(top: 40.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        gradient: const SweepGradient(
-          startAngle: 0.0,
-          endAngle: 6.28,
-          colors: [
-            Color(0xFFE2CBFF),
-            Color(0xFF393BB2),
-            Color(0xFFE2CBFF),
-          ],
-        ),
-      ),
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF0F172A),
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          shape: RoundedRectangleBorder(
+    return MouseRegion(
+      onEnter: (_) {
+        setState(() {
+          // Scale up and add shadow on hover
+          _scale = 1.1;
+          _elevation = 8.0;
+        });
+      },
+      onExit: (_) {
+        setState(() {
+          // Reset scale and shadow when hover ends
+          _scale = 1.0;
+          _elevation = 0.0;
+        });
+      },
+      child: Transform.scale(
+        scale: _scale,
+        child: Container(
+          margin: widget.margin ?? const EdgeInsets.only(top: 40.0),
+          decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-          ),
-          textStyle: const TextStyle(
-            fontSize: 14.0,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (position == "left" && icon != null) ...[
-              icon!,
-              const SizedBox(width: 8)
-            ],
-            Text(
-              title,
-              style: const TextStyle(color: Colors.white),
+            gradient: const SweepGradient(
+              startAngle: 0.0,
+              endAngle: 6.28,
+              colors: [
+                Color(0xFFE2CBFF),
+                Color(0xFF393BB2),
+                Color(0xFFE2CBFF),
+              ],
             ),
-            if (position == "right" && icon != null) ...[
-              const SizedBox(width: 8),
-              icon!
-            ],
-          ],
+          ),
+          child: ElevatedButton(
+            onPressed: widget.onPressed,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF0F172A),
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              textStyle: const TextStyle(
+                fontSize: 14.0,
+                fontWeight: FontWeight.w500,
+              ),
+              elevation: _elevation, // Apply the dynamic elevation
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (widget.position == "left" && widget.icon != null) ...[
+                  widget.icon!,
+                  const SizedBox(width: 8)
+                ],
+                Text(
+                  widget.title,
+                  style: const TextStyle(color: Colors.white),
+                ),
+                if (widget.position == "right" && widget.icon != null) ...[
+                  const SizedBox(width: 8),
+                  widget.icon!
+                ],
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 }
+
