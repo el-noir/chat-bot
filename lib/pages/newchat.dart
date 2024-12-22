@@ -3,6 +3,7 @@ import 'magic_button.dart'; // Assuming you have MagicButton defined elsewhere.
 import 'signup.dart';
 import './chatbot_service.dart';
 import './custompage.dart';
+import './profilepage.dart';
 
 class AnimatedTile extends StatelessWidget {
   final String title;
@@ -179,82 +180,66 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
         children: [
           Column(
             children: [
-              if (!hasUserStartedChat)
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Hello, how can I assist you?",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: isDarkMode ? Colors.white : Colors.black,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 30),
-                      SlideTransition(
-                        position: _slideAnimation,
-                        child: AnimatedTile(
-                          title: "Ask me anything!",
-                          onTap: updateTextInput,
-                        ),
-                      ),
-                      SlideTransition(
-                        position: _slideAnimation,
-                        child: AnimatedTile(
-                          title: "What's your mood today?",
-                          onTap: updateTextInput,
-                        ),
-                      ),
-                      SlideTransition(
-                        position: _slideAnimation,
-                        child: AnimatedTile(
-                          title: "Tell me a joke!",
-                          onTap: updateTextInput,
-                        ),
-                      ),
-                      SlideTransition(
-                        position: _slideAnimation,
-                        child: AnimatedTile(
-                          title: "Need help with something?",
-                          onTap: updateTextInput,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              if (hasUserStartedChat)
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: chatHistory.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 8.0, horizontal: 16.0),
-                        child: Align(
-                          alignment: chatHistory[index].startsWith("You:")
-                              ? Alignment.centerRight
-                              : Alignment.centerLeft,
-                          child: Container(
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: chatHistory[index].startsWith("You:")
-                                  ? Colors.blue[200]
-                                  : Colors.grey[300],
-                              borderRadius: BorderRadius.circular(12),
+              Expanded(
+                child: hasUserStartedChat
+                    ? ListView.builder(
+                        itemCount: chatHistory.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 8.0, horizontal: 16.0),
+                            child: Align(
+                              alignment: chatHistory[index].startsWith("You:")
+                                  ? Alignment.centerRight
+                                  : Alignment.centerLeft,
+                              child: Container(
+                                padding: EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: chatHistory[index].startsWith("You:")
+                                      ? Colors.blue[200]
+                                      : Colors.grey[300],
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  chatHistory[index],
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                              ),
                             ),
-                            child: Text(
-                              chatHistory[index],
-                              style: TextStyle(fontSize: 16),
+                          );
+                        },
+                      )
+                    : Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Welcome to ChatGPT!",
+                              style: TextStyle(
+                                color: isDarkMode ? Colors.white : Colors.black,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
+                            SizedBox(height: 20),
+                            Text(
+                              "Type your first message to start...",
+                              style: TextStyle(
+                                color: isDarkMode
+                                    ? Colors.white70
+                                    : Colors.black54,
+                                fontSize: 16,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                            SizedBox(height: 30),
+                            AnimatedTypingIndicator(isDarkMode: isDarkMode),
+                            SizedBox(height: 40),
+                          ],
                         ),
-                      );
-                    },
-                  ),
-                ),
+                      ),
+
+              ),
               if (isBotTyping)
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -266,6 +251,30 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                 ),
               ChatInputField(
                   controller: _textController, sendMessage: sendMessage),
+              if (!isSidebarOpen)
+                Footer(
+                  onProfileTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProfilePage(
+                          isUserLoggedIn:
+                              true, // Replace with actual login state
+                          username: "John Doe", // Replace with actual username
+                          email:
+                              "johndoe@example.com", // Replace with actual email
+                          profileImageUrl:
+                              "https://example.com/profile.jpg", // Replace with actual URL
+                        ),
+                      ),
+                    );
+                  },
+                  onChatHistoryTap: () {
+                    // Open chat history
+                  },
+                  onNewChatTap: startNewChat,
+                ),
+
             ],
           ),
           AnimatedPositioned(
@@ -275,71 +284,135 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
             bottom: 0,
             child: Material(
               elevation: 5,
-              child: Container(
-                width: 250,
-                color: isDarkMode ? Colors.grey[850] : Colors.white,
-                child: Column(
-                  children: [
-                    ListTile(
-                      leading: Icon(Icons.chat,
-                          color: isDarkMode ? Colors.white : Colors.black),
-                      title: Text("New Chat",
-                          style: TextStyle(
-                              color: isDarkMode ? Colors.white : Colors.black)),
-                      onTap: startNewChat,
-                    ),
-                    if (!isUserLoggedIn) // Hide if the user is logged in
-                      ListTile(
-                        leading: Icon(Icons.person_add,
-                            color: isDarkMode ? Colors.white : Colors.black),
-                        title: Text("Sign Up",
-                            style: TextStyle(
-                                color:
-                                    isDarkMode ? Colors.white : Colors.black)),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SignUpPage()),
-                          );
-                        },
-                      ),
-                    ListTile(
-                      leading: Icon(Icons.settings,
-                          color: isDarkMode ? Colors.white : Colors.black),
-                      title: Text("Settings",
-                          style: TextStyle(
-                              color: isDarkMode ? Colors.white : Colors.black)),
-                      onTap: () {
-                        // Navigate to settings page
-                      },
-                    ),
-                    Divider(),
-                    ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage: isUserLoggedIn
-                            ? AssetImage('assets/profile.jpg')
-                            : AssetImage('assets/what-is-bot.webp'),
-                      ),
-                      title: Text("Profile",
-                          style: TextStyle(
-                              color: isDarkMode ? Colors.white : Colors.black)),
-                    ),
-                    Divider(),
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          'No history available.',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: isDarkMode ? Colors.white54 : Colors.black54,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                  ],
+              child: SidebarWidget(
+                isDarkMode: isDarkMode,
+                onNewChatTap: startNewChat,
+                onSignUpTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SignUpPage()),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+}
+
+class AnimatedTypingIndicator extends StatefulWidget {
+  final bool isDarkMode;
+
+  AnimatedTypingIndicator({required this.isDarkMode});
+
+  @override
+  _AnimatedTypingIndicatorState createState() =>
+      _AnimatedTypingIndicatorState();
+}
+
+class _AnimatedTypingIndicatorState extends State<AnimatedTypingIndicator>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 1),
+    )..repeat(reverse: true);
+
+    _animation = Tween<double>(begin: 0.5, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(3, (index) {
+        return ScaleTransition(
+          scale: _animation,
+          child: Container(
+            margin: EdgeInsets.symmetric(horizontal: 4),
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(
+              color: widget.isDarkMode ? Colors.white : Colors.black,
+              shape: BoxShape.circle,
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+
+class SidebarWidget extends StatelessWidget {
+  final bool isDarkMode;
+  final VoidCallback onNewChatTap;
+  final VoidCallback onSignUpTap;
+
+  SidebarWidget({
+    required this.isDarkMode,
+    required this.onNewChatTap,
+    required this.onSignUpTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 250,
+      color: isDarkMode ? Colors.grey[850] : Colors.white,
+      child: Column(
+        children: [
+          ListTile(
+            leading: Icon(Icons.chat,
+                color: isDarkMode ? Colors.white : Colors.black),
+            title: Text("New Chat",
+                style:
+                    TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
+            onTap: onNewChatTap,
+          ),
+          ListTile(
+            leading: Icon(Icons.person_add,
+                color: isDarkMode ? Colors.white : Colors.black),
+            title: Text("Sign Up",
+                style:
+                    TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
+            onTap: onSignUpTap,
+          ),
+          Divider(),
+          ListTile(
+            leading: CircleAvatar(
+              backgroundImage: AssetImage('assets/profile.jpg'),
+            ),
+            title: Text("Profile",
+                style:
+                    TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
+          ),
+          Divider(),
+          Expanded(
+            child: Center(
+              child: Text(
+                'No history available.',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: isDarkMode ? Colors.white54 : Colors.black54,
                 ),
+                textAlign: TextAlign.center,
               ),
             ),
           ),
@@ -360,12 +433,11 @@ class ChatInputField extends StatelessWidget {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: EdgeInsets.all(10),
+      padding: EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.grey[800] : Colors.grey[200],
-        border: Border(
-          top: BorderSide(color: isDarkMode ? Colors.white54 : Colors.grey),
-        ),
+        color: isDarkMode ? Colors.grey[800] : Colors.grey[300],
+        borderRadius: BorderRadius.circular(30),
       ),
       child: Row(
         children: [
@@ -375,14 +447,77 @@ class ChatInputField extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: "Type your message...",
                 hintStyle: TextStyle(
-                    color: isDarkMode ? Colors.white54 : Colors.black),
+                    color: isDarkMode ? Colors.white54 : Colors.black54),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(horizontal: 8),
               ),
             ),
           ),
-          SizedBox(width: 8),
-          ElevatedButton(onPressed: sendMessage, child: Text("Send"))
+          IconButton(
+            icon: Icon(Icons.send,
+                color: isDarkMode ? Colors.white : Colors.black),
+            onPressed: sendMessage,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+class Footer extends StatelessWidget {
+  final VoidCallback onProfileTap;
+  final VoidCallback onChatHistoryTap;
+  final VoidCallback onNewChatTap;
+
+  Footer({
+    required this.onProfileTap,
+    required this.onChatHistoryTap,
+    required this.onNewChatTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        color: isDarkMode ? Colors.grey[850] : Colors.grey[200],
+        border: Border(
+            top: BorderSide(color: isDarkMode ? Colors.white54 : Colors.grey)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          IconButton(
+            icon: Icon(Icons.person,
+                color: isDarkMode ? Colors.white : Colors.black),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfilePage(
+                    isUserLoggedIn: true, // Replace with actual login state
+                    username: "John Doe", // Replace with actual username
+                    email: "johndoe@example.com", // Replace with actual email
+                    profileImageUrl:
+                        "https://example.com/profile.jpg", // Replace with actual URL
+                  ),
+                ),
+              );
+            },
+          ),
+
+          IconButton(
+            icon: Icon(Icons.history,
+                color: isDarkMode ? Colors.white : Colors.black),
+            onPressed: onChatHistoryTap,
+          ),
+          IconButton(
+            icon: Icon(Icons.chat,
+                color: isDarkMode ? Colors.white : Colors.black),
+            onPressed: onNewChatTap,
+          ),
         ],
       ),
     );
