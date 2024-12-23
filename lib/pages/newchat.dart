@@ -243,11 +243,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
               if (isBotTyping)
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    "Bot is typing...",
-                    style: TextStyle(
-                        fontStyle: FontStyle.italic, color: Colors.grey),
-                  ),
+                  child: AnimatedTypingDots(isDarkMode: isDarkMode),
                 ),
               ChatInputField(
                   controller: _textController, sendMessage: sendMessage),
@@ -293,14 +289,84 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                     MaterialPageRoute(builder: (context) => SignUpPage()),
                   );
                 },
+                onProfileTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProfilePage(
+                        isUserLoggedIn: true, // Replace with actual login state
+                        username: "John Doe", // Replace with actual username
+                        email:
+                            "johndoe@example.com", // Replace with actual email
+                        profileImageUrl:
+                            "https://example.com/profile.jpg", // Replace with actual URL
+                      ),
+                    ),
+                  );
+                }, // Add navigation logic for Profile
               ),
             ),
           ),
+
         ],
       ),
     );
   }
 
+}
+
+class AnimatedTypingDots extends StatefulWidget {
+  final bool isDarkMode;
+
+  AnimatedTypingDots({required this.isDarkMode});
+
+  @override
+  _AnimatedTypingDotsState createState() => _AnimatedTypingDotsState();
+}
+
+class _AnimatedTypingDotsState extends State<AnimatedTypingDots>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 1),
+    )..repeat(reverse: true);
+
+    _animation = Tween<double>(begin: 0.2, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(3, (index) {
+        return FadeTransition(
+          opacity: _animation,
+          child: Text(
+            '.',
+            style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              color: widget.isDarkMode ? Colors.white : Colors.black,
+            ),
+          ),
+        );
+      }),
+    );
+  }
 }
 
 class AnimatedTypingIndicator extends StatefulWidget {
@@ -364,11 +430,13 @@ class SidebarWidget extends StatelessWidget {
   final bool isDarkMode;
   final VoidCallback onNewChatTap;
   final VoidCallback onSignUpTap;
+  final VoidCallback onProfileTap; // Add this callback for Profile navigation
 
   SidebarWidget({
     required this.isDarkMode,
     required this.onNewChatTap,
     required this.onSignUpTap,
+    required this.onProfileTap, // Include in the constructor
   });
 
   @override
@@ -402,6 +470,7 @@ class SidebarWidget extends StatelessWidget {
             title: Text("Profile",
                 style:
                     TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
+            onTap: onProfileTap, // Add the callback here
           ),
           Divider(),
           Expanded(

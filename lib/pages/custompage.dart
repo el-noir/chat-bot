@@ -57,29 +57,31 @@ class _EnhancedPageWithAnimationsState extends State<Custompage>
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        title: GestureDetector(
+        title: Hero(
+          tag: 'appBarTitle',
+          child: Text(
+            'New Chat',
+            style: TextStyle(
+              color: widget.isDarkMode ? Colors.white : Colors.black,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        leading: GestureDetector(
           onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ChatPage(), // New Chat Page
+                builder: (context) => ChatPage(), // Navigate to New Chat Page
               ),
             );
           },
-          child: Hero(
-            tag: 'appBarTitle',
-            child: Text(
-              'New Chat',
-              style: TextStyle(
-                color: widget.isDarkMode ? Colors.white : Colors.black,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+          child: Icon(
+            Icons.chat_bubble_outline,
+            color: widget.isDarkMode ? Colors.white : Colors.black,
           ),
         ),
-        leading: Icon(Icons.chat_bubble_outline,
-            color: widget.isDarkMode ? Colors.white : Colors.black),
         actions: [
           IconButton(
             icon: Icon(
@@ -129,13 +131,10 @@ class _EnhancedPageWithAnimationsState extends State<Custompage>
             ),
 
             // Signup and Login Buttons Section
-            // Inside your build method after the text message
-
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment
-                    .center, // Ensure buttons are aligned in center
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Signup Button
                   MagicButton(
@@ -172,7 +171,6 @@ class _EnhancedPageWithAnimationsState extends State<Custompage>
                 ],
               ),
             ),
-
 
             // Horizontal Buttons Section (Terms, Privacy, Settings)
             Padding(
@@ -241,6 +239,7 @@ class _EnhancedPageWithAnimationsState extends State<Custompage>
       ),
     );
   }
+
 }
 
 // OptionTile Widget
