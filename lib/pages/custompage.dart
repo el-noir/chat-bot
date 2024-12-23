@@ -60,7 +60,7 @@ class _EnhancedPageWithAnimationsState extends State<Custompage>
         title: Hero(
           tag: 'appBarTitle',
           child: Text(
-            'New Chat',
+            'AI BARKAT',
             style: TextStyle(
               color: widget.isDarkMode ? Colors.white : Colors.black,
               fontSize: 20,

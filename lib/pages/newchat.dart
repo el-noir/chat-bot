@@ -146,7 +146,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
         backgroundColor: isDarkMode ? Colors.grey[850] : Colors.transparent,
         elevation: 0,
         title: Text(
-          'ChatGPT',
+          'AI BARKAT',
           style: TextStyle(
             color: isDarkMode ? Colors.white : Colors.black,
             fontWeight: FontWeight.bold,
@@ -186,27 +186,64 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                         itemCount: chatHistory.length,
                         itemBuilder: (context, index) {
                           return Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 8.0, horizontal: 16.0),
-                            child: Align(
-                              alignment: chatHistory[index].startsWith("You:")
-                                  ? Alignment.centerRight
-                                  : Alignment.centerLeft,
-                              child: Container(
-                                padding: EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: chatHistory[index].startsWith("You:")
-                                      ? Colors.blue[200]
-                                      : Colors.grey[300],
-                                  borderRadius: BorderRadius.circular(12),
+                        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                        child: Align(
+                          alignment: chatHistory[index].startsWith("You:")
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
+                          child: chatHistory[index].startsWith("You:")
+                              ? Container(
+                                  padding: EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue[200],
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    chatHistory[index].substring(4), // Remove "You: " prefix
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                )
+                              : Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    CircleAvatar(
+                                    radius: 20, // Adjust the size as needed
+                                    backgroundImage: AssetImage('assets/profile.jpg'),
+                                    backgroundColor: Colors.transparent, // Set to transparent or a fallback color
+                                  ),
+
+                                    SizedBox(width: 8),
+                                    Expanded(
+                                      child: Container(
+                                        padding: EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[300],
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "barkatBot",
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                            SizedBox(height: 4),
+                                            Text(
+                                              chatHistory[index].substring(5), // Remove "Bot: " prefix
+                                              style: TextStyle(fontSize: 16),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                child: Text(
-                                  chatHistory[index],
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                              ),
-                            ),
-                          );
+                        ),
+                      );
+
                         },
                       )
                     : Center(
@@ -214,7 +251,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              "Welcome to ChatGPT!",
+                              "Welcome to AI BARKAT!",
                               style: TextStyle(
                                 color: isDarkMode ? Colors.white : Colors.black,
                                 fontSize: 24,
