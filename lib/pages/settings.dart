@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'login.dart'; // Assuming this is the login page
+import 'about_page.dart';
+
 
 class SettingsPage extends StatefulWidget {
   final Function(bool) onThemeChanged; // Callback to update theme
@@ -71,7 +73,7 @@ class _SettingsPageState extends State<SettingsPage> {
             title: const Text('Language'),
             trailing: DropdownButton<String>(
               value: _selectedLanguage,
-              items: ['English', 'Spanish', 'French', 'German']
+              items: ['English',]
                   .map((lang) =>
                       DropdownMenuItem<String>(value: lang, child: Text(lang)))
                   .toList(),
@@ -133,9 +135,16 @@ class _SettingsPageState extends State<SettingsPage> {
             leading: const Icon(Icons.info_outline),
             title: const Text('About App'),
             onTap: () {
-              // Navigate to About Page (Implement separately)
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AboutPage(isDarkMode: _isDarkMode),
+                ),
+              );
             },
           ),
+
+
           ListTile(
             leading: const Icon(Icons.support),
             title: const Text('Support'),

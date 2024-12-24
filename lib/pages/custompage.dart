@@ -3,46 +3,40 @@ import 'login.dart';
 import 'signup.dart';
 import 'newchat.dart';
 import 'settings.dart';
-import 'terms.dart'; // Import the TermsPage
-import 'privacy.dart'; // Import the PrivacyPage
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'terms.dart';
+import 'privacy.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 
-class Custompage extends StatefulWidget {
-  final Function(bool) onThemeChanged; // Callback to handle theme change
-  final bool isDarkMode; // Current theme state
+class CustomPage extends StatefulWidget {
+  final Function(bool) onThemeChanged;
+  final bool isDarkMode;
 
-  const Custompage({
+  const CustomPage({
     Key? key,
     required this.onThemeChanged,
     required this.isDarkMode,
   }) : super(key: key);
 
   @override
-  _EnhancedPageWithAnimationsState createState() =>
-      _EnhancedPageWithAnimationsState();
+  _EnhancedPageWithAnimationsState createState() => _EnhancedPageWithAnimationsState();
 }
 
-class _EnhancedPageWithAnimationsState extends State<Custompage> with SingleTickerProviderStateMixin {
+class _EnhancedPageWithAnimationsState extends State<CustomPage> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
-
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     );
-
     _fadeAnimation = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeIn,
     );
-
-    _controller.forward(); // Start animation on page load
+    _controller.forward();
   }
 
   @override
@@ -59,7 +53,18 @@ class _EnhancedPageWithAnimationsState extends State<Custompage> with SingleTick
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        title: GestureDetector(
+        title: Hero(
+          tag: 'appBarTitle',
+          child: Text(
+            'AI BARKAT',
+            style: TextStyle(
+              color: widget.isDarkMode ? Colors.white : Colors.black,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        leading: GestureDetector(
           onTap: () {
             final user = FirebaseAuth.instance.currentUser;
             if (user != null) {
@@ -73,25 +78,22 @@ class _EnhancedPageWithAnimationsState extends State<Custompage> with SingleTick
                 ),
               );
             } else {
+              // Show a dialog or navigate to the login page
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Please log in to access chat')),
+                const SnackBar(content: Text('Please log in to access chat')),
+              );
+              // Optionally, navigate to the login page directly
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => LoginPage()),
               );
             }
           },
-          child: Hero(
-            tag: 'appBarTitle',
-            child: Text(
-              'New Chat',
-              style: TextStyle(
-                color: widget.isDarkMode ? Colors.white : Colors.black,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+          child: Icon(
+            Icons.chat_bubble_outline,
+            color: widget.isDarkMode ? Colors.white : Colors.black,
           ),
         ),
-        leading: Icon(Icons.chat_bubble_outline,
-            color: widget.isDarkMode ? Colors.white : Colors.black),
         actions: [
           IconButton(
             icon: Icon(
@@ -109,7 +111,6 @@ class _EnhancedPageWithAnimationsState extends State<Custompage> with SingleTick
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Main Content Section
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: TweenAnimationBuilder(
@@ -120,7 +121,7 @@ class _EnhancedPageWithAnimationsState extends State<Custompage> with SingleTick
                   return Opacity(
                     opacity: value,
                     child: Transform.translate(
-                      offset: Offset(0, 20 * (1 - value)), // Slide up as it fades in
+                      offset: Offset(0, 20 * (1 - value)),
                       child: child,
                     ),
                   );
@@ -137,7 +138,6 @@ class _EnhancedPageWithAnimationsState extends State<Custompage> with SingleTick
                 ),
               ),
             ),
-            // Signup and Login Buttons Section
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Row(
@@ -145,18 +145,18 @@ class _EnhancedPageWithAnimationsState extends State<Custompage> with SingleTick
                 children: [
                   MagicButton(
                     title: 'Signup',
-                    icon: Icon(Icons.app_registration),
+                    icon: const Icon(Icons.app_registration),
                     position: 'left',
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
                           builder: (context) => SignUpPage(
-                            userId: '', // Pass empty or default values here for now
+                            userId: '',
                             email: '',
                             username: '',
                             profileImageUrl: '',
-                            isUserLoggedIn: false, // Default to false for sign up page
+                            isUserLoggedIn: false,
                           ),
                         ),
                       );
@@ -165,21 +165,18 @@ class _EnhancedPageWithAnimationsState extends State<Custompage> with SingleTick
                   const SizedBox(width: 20),
                   MagicButton(
                     title: 'Login',
-                    icon: Icon(Icons.login),
+                    icon: const Icon(Icons.login),
                     position: 'right',
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => LoginPage(),
-                        ),
+                        MaterialPageRoute(builder: (context) => LoginPage()),
                       );
                     },
                   ),
                 ],
               ),
             ),
-            // Horizontal Buttons Section (Terms, Privacy, Settings)
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Row(
@@ -190,8 +187,7 @@ class _EnhancedPageWithAnimationsState extends State<Custompage> with SingleTick
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              TermsPage(isDarkMode: widget.isDarkMode),
+                          builder: (context) => TermsPage(isDarkMode: widget.isDarkMode),
                         ),
                       );
                     },
@@ -206,8 +202,7 @@ class _EnhancedPageWithAnimationsState extends State<Custompage> with SingleTick
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              PrivacyPage(isDarkMode: widget.isDarkMode),
+                          builder: (context) => PrivacyPage(isDarkMode: widget.isDarkMode),
                         ),
                       );
                     },
@@ -244,6 +239,7 @@ class _EnhancedPageWithAnimationsState extends State<Custompage> with SingleTick
     );
   }
 }
+
 // OptionTile Widget
 class OptionTile extends StatelessWidget {
   final String title;

@@ -55,7 +55,7 @@ class _MyAppState extends State<MyApp> {
       themeMode: _themeMode, // Dynamically change theme
       initialRoute: '/', // Set the initial route
       routes: {
-        '/': (context) => Custompage(
+        '/': (context) => CustomPage(
               onThemeChanged: _toggleTheme, // Pass the toggle callback
               isDarkMode: _themeMode == ThemeMode.dark, // Pass current theme
             ),
