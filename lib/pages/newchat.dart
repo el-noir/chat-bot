@@ -4,6 +4,8 @@ import 'signup.dart';
 import './chatbot_service.dart';
 import './custompage.dart';
 import './profilepage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AnimatedTile extends StatelessWidget {
   final String title;
@@ -43,15 +45,35 @@ class AnimatedTile extends StatelessWidget {
 }
 
 class ChatPage extends StatefulWidget {
+  final String userId;
+  final String email;
+
+  // Add named parameters in the constructor
+  ChatPage({required this.userId, required this.email});
   @override
   _ChatPageState createState() => _ChatPageState();
 }
 
 class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
+  FirebaseAuth _auth = FirebaseAuth.instance;
+  User? _user;
+  DocumentSnapshot? _userData;
+  // Fetch user data from Firestore
+  void _fetchUserData() async {
+  DocumentSnapshot userDoc = await FirebaseFirestore.instance
+      .collection('users')
+      .doc(_user!.uid) // Assuming the user document is named with UID
+      .get();
+
+  setState(() {
+  _userData = userDoc;
+  });
+  }
+
   bool isSidebarOpen = false;
   List<String> chatHistory = [];
   bool isUserLoggedIn =
-      false; // Assume this is determined based on the user's login status
+  false; // Assume this is determined based on the user's login status
   bool isBotTyping = false;
   bool hasUserStartedChat = false;
 
@@ -103,6 +125,10 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _user = _auth.currentUser;
+    if (_user != null) {
+      _fetchUserData();
+    }
     _animationController = AnimationController(
       vsync: this,
       duration: Duration(seconds: 1),
@@ -183,71 +209,67 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
               Expanded(
                 child: hasUserStartedChat
                     ? ListView.builder(
-                        itemCount: chatHistory.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 8.0, horizontal: 16.0),
-                            child: Align(
-                              alignment: chatHistory[index].startsWith("You:")
-                                  ? Alignment.centerRight
-                                  : Alignment.centerLeft,
-                              child: Container(
-                                padding: EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: chatHistory[index].startsWith("You:")
-                                      ? Colors.blue[200]
-                                      : Colors.grey[300],
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  chatHistory[index],
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      )
-                    : Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Welcome to ChatGPT!",
-                              style: TextStyle(
-                                color: isDarkMode ? Colors.white : Colors.black,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 20),
-                            Text(
-                              "Type your first message to start...",
-                              style: TextStyle(
-                                color: isDarkMode
-                                    ? Colors.white70
-                                    : Colors.black54,
-                                fontSize: 16,
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
-                            SizedBox(height: 30),
-                            AnimatedTypingIndicator(isDarkMode: isDarkMode),
-                            SizedBox(height: 40),
-                          ],
+                  itemCount: chatHistory.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16.0),
+                      child: Align(
+                        alignment: chatHistory[index].startsWith("You:")
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: Container(
+                          padding: EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: chatHistory[index].startsWith("You:")
+                                ? Colors.blue[200]
+                                : Colors.grey[300],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            chatHistory[index],
+                            style: TextStyle(fontSize: 16),
+                          ),
                         ),
                       ),
+                    );
+                  },
+                )
+                    : Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Welcome to ChatGPT!",
+                        style: TextStyle(
+                          color: isDarkMode ? Colors.white : Colors.black,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Text(
+                        "Type your first message to start...",
+                        style: TextStyle(
+                          color: isDarkMode
+                              ? Colors.white70
+                              : Colors.black54,
+                          fontSize: 16,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                      SizedBox(height: 30),
+                      AnimatedTypingIndicator(isDarkMode: isDarkMode),
+                      SizedBox(height: 40),
+                    ],
+                  ),
+                ),
 
               ),
               if (isBotTyping)
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    "Bot is typing...",
-                    style: TextStyle(
-                        fontStyle: FontStyle.italic, color: Colors.grey),
-                  ),
+                  child: AnimatedTypingDots(isDarkMode: isDarkMode),
                 ),
               ChatInputField(
                   controller: _textController, sendMessage: sendMessage),
@@ -259,12 +281,12 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                       MaterialPageRoute(
                         builder: (context) => ProfilePage(
                           isUserLoggedIn:
-                              true, // Replace with actual login state
+                          true, // Replace with actual login state
                           username: "John Doe", // Replace with actual username
                           email:
-                              "johndoe@example.com", // Replace with actual email
+                          "johndoe@example.com", // Replace with actual email
                           profileImageUrl:
-                              "https://example.com/profile.jpg", // Replace with actual URL
+                          "https://example.com/profile.jpg", // Replace with actual URL
                         ),
                       ),
                     );
@@ -290,17 +312,93 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                 onSignUpTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => SignUpPage()),
+                    MaterialPageRoute(builder: (context) => SignUpPage(
+                      isUserLoggedIn: true,  // Replace with actual login state
+                      username: "John Doe",  // Replace with actual username
+                      email: "johndoe@example.com",  // Replace with actual email
+                      profileImageUrl: "https://example.com/profile.jpg",  // Replace with actual URL
+                      userId: _user!.uid,  // Pass the actual userId
+                    )),
                   );
                 },
+                onProfileTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProfilePage(
+                        isUserLoggedIn: true, // Replace with actual login state
+                        username: "John Doe", // Replace with actual username
+                        email:
+                        "johndoe@example.com", // Replace with actual email
+                        profileImageUrl:
+                        "https://example.com/profile.jpg", // Replace with actual URL
+                      ),
+                    ),
+                  );
+                }, // Add navigation logic for Profile
               ),
             ),
           ),
+
         ],
       ),
     );
   }
 
+}
+
+class AnimatedTypingDots extends StatefulWidget {
+  final bool isDarkMode;
+
+  AnimatedTypingDots({required this.isDarkMode});
+
+  @override
+  _AnimatedTypingDotsState createState() => _AnimatedTypingDotsState();
+}
+
+class _AnimatedTypingDotsState extends State<AnimatedTypingDots>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 1),
+    )..repeat(reverse: true);
+
+    _animation = Tween<double>(begin: 0.2, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(3, (index) {
+        return FadeTransition(
+          opacity: _animation,
+          child: Text(
+            '.',
+            style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              color: widget.isDarkMode ? Colors.white : Colors.black,
+            ),
+          ),
+        );
+      }),
+    );
+  }
 }
 
 class AnimatedTypingIndicator extends StatefulWidget {
@@ -364,11 +462,13 @@ class SidebarWidget extends StatelessWidget {
   final bool isDarkMode;
   final VoidCallback onNewChatTap;
   final VoidCallback onSignUpTap;
+  final VoidCallback onProfileTap; // Add this callback for Profile navigation
 
   SidebarWidget({
     required this.isDarkMode,
     required this.onNewChatTap,
     required this.onSignUpTap,
+    required this.onProfileTap, // Include in the constructor
   });
 
   @override
@@ -383,7 +483,7 @@ class SidebarWidget extends StatelessWidget {
                 color: isDarkMode ? Colors.white : Colors.black),
             title: Text("New Chat",
                 style:
-                    TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
+                TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
             onTap: onNewChatTap,
           ),
           ListTile(
@@ -391,7 +491,7 @@ class SidebarWidget extends StatelessWidget {
                 color: isDarkMode ? Colors.white : Colors.black),
             title: Text("Sign Up",
                 style:
-                    TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
+                TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
             onTap: onSignUpTap,
           ),
           Divider(),
@@ -401,7 +501,8 @@ class SidebarWidget extends StatelessWidget {
             ),
             title: Text("Profile",
                 style:
-                    TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
+                TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
+            onTap: onProfileTap, // Add the callback here
           ),
           Divider(),
           Expanded(
@@ -463,7 +564,6 @@ class ChatInputField extends StatelessWidget {
   }
 }
 
-
 class Footer extends StatelessWidget {
   final VoidCallback onProfileTap;
   final VoidCallback onChatHistoryTap;
@@ -501,7 +601,7 @@ class Footer extends StatelessWidget {
                     username: "John Doe", // Replace with actual username
                     email: "johndoe@example.com", // Replace with actual email
                     profileImageUrl:
-                        "https://example.com/profile.jpg", // Replace with actual URL
+                    "https://example.com/profile.jpg", // Replace with actual URL
                   ),
                 ),
               );

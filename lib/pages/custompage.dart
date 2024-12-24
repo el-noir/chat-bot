@@ -5,6 +5,9 @@ import 'newchat.dart';
 import 'settings.dart';
 import 'terms.dart'; // Import the TermsPage
 import 'privacy.dart'; // Import the PrivacyPage
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class Custompage extends StatefulWidget {
   final Function(bool) onThemeChanged; // Callback to handle theme change
@@ -21,8 +24,7 @@ class Custompage extends StatefulWidget {
       _EnhancedPageWithAnimationsState();
 }
 
-class _EnhancedPageWithAnimationsState extends State<Custompage>
-    with SingleTickerProviderStateMixin {
+class _EnhancedPageWithAnimationsState extends State<Custompage> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
 
@@ -59,12 +61,22 @@ class _EnhancedPageWithAnimationsState extends State<Custompage>
         centerTitle: true,
         title: GestureDetector(
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ChatPage(), // New Chat Page
-              ),
-            );
+            final user = FirebaseAuth.instance.currentUser;
+            if (user != null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatPage(
+                    userId: user.uid,
+                    email: user.email ?? 'No Email',
+                  ),
+                ),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Please log in to access chat')),
+              );
+            }
           },
           child: Hero(
             tag: 'appBarTitle',
@@ -87,7 +99,6 @@ class _EnhancedPageWithAnimationsState extends State<Custompage>
               color: widget.isDarkMode ? Colors.white : Colors.black,
             ),
             onPressed: () {
-              // Toggle theme on press
               widget.onThemeChanged(!widget.isDarkMode);
             },
           ),
@@ -109,8 +120,7 @@ class _EnhancedPageWithAnimationsState extends State<Custompage>
                   return Opacity(
                     opacity: value,
                     child: Transform.translate(
-                      offset: Offset(
-                          0, 20 * (1 - value)), // Slide up as it fades in
+                      offset: Offset(0, 20 * (1 - value)), // Slide up as it fades in
                       child: child,
                     ),
                   );
@@ -127,40 +137,37 @@ class _EnhancedPageWithAnimationsState extends State<Custompage>
                 ),
               ),
             ),
-
             // Signup and Login Buttons Section
-            // Inside your build method after the text message
-
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment
-                    .center, // Ensure buttons are aligned in center
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Signup Button
                   MagicButton(
                     title: 'Signup',
-                    icon: Icon(
-                        Icons.app_registration), // Pass the Icon widget here
+                    icon: Icon(Icons.app_registration),
                     position: 'left',
                     onPressed: () {
-                      // Navigate to Signup Page
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => SignUpPage(),
+                          builder: (context) => SignUpPage(
+                            userId: '', // Pass empty or default values here for now
+                            email: '',
+                            username: '',
+                            profileImageUrl: '',
+                            isUserLoggedIn: false, // Default to false for sign up page
+                          ),
                         ),
                       );
                     },
                   ),
-                  const SizedBox(width: 20), // Add some space between buttons
-                  // Login Button
+                  const SizedBox(width: 20),
                   MagicButton(
                     title: 'Login',
-                    icon: Icon(Icons.login), // Pass the Icon widget here
+                    icon: Icon(Icons.login),
                     position: 'right',
                     onPressed: () {
-                      // Navigate to Login Page
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -172,15 +179,12 @@ class _EnhancedPageWithAnimationsState extends State<Custompage>
                 ],
               ),
             ),
-
-
             // Horizontal Buttons Section (Terms, Privacy, Settings)
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  // Terms Button
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -197,7 +201,6 @@ class _EnhancedPageWithAnimationsState extends State<Custompage>
                       isDarkMode: widget.isDarkMode,
                     ),
                   ),
-                  // Privacy Button
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -214,7 +217,6 @@ class _EnhancedPageWithAnimationsState extends State<Custompage>
                       isDarkMode: widget.isDarkMode,
                     ),
                   ),
-                  // Settings Button
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -242,7 +244,6 @@ class _EnhancedPageWithAnimationsState extends State<Custompage>
     );
   }
 }
-
 // OptionTile Widget
 class OptionTile extends StatelessWidget {
   final String title;
